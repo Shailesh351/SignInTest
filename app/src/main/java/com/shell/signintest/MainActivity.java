@@ -2,9 +2,11 @@ package com.shell.signintest;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,7 +22,13 @@ import com.google.firebase.auth.api.model.StringList;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private TextInputLayout mTextInputLayoutEmail;
+    private TextInputLayout mTextInputLayoutPassword;
     
     private EditText mEditTextViewEmail;
     private EditText mEditTextViewPassword;
@@ -39,6 +47,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mTextInputLayoutEmail = (TextInputLayout) findViewById(R.id.text_input_layout_email);
+        mTextInputLayoutPassword = (TextInputLayout) findViewById(R.id.text_input_layout_password);
 
         mEditTextViewEmail = (EditText) findViewById(R.id.email_text);
         mEditTextViewPassword = (EditText) findViewById(R.id.password_text);
@@ -71,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         };
     }
 
+    //Create new Account(Sign Up)
     private void createAccount(String email, String password){
         if(!validateForm()){
             return;
@@ -87,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
     }
 
+    //sign In
     private void signIn(String email, String password){
         if(!validateForm()){
             return;
@@ -103,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
     }
 
+    //Sign out
     private  void  signOut(){
         mAuth.signOut();
         updateUI(null);
@@ -119,26 +133,52 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    //Validate Email and Password Field
     private boolean validateForm(){
-        boolean valid = true;
 
         String email = mEditTextViewEmail.getText().toString();
         if(TextUtils.isEmpty(email)){
+            mTextInputLayoutEmail.setError("Emaill Id Required");
             Toast.makeText(MainActivity.this, "Email field required", Toast.LENGTH_SHORT).show();
-            valid = false;
+            return false;
+        }else if(!isEmailValid(email)){
+            mTextInputLayoutEmail.setError("A valid Email id is required");
+            return false;
         }else{
-
+            mTextInputLayoutEmail.setError(null);
         }
 
         String password = mEditTextViewPassword.getText().toString();
         if(TextUtils.isEmpty(password)){
+            mTextInputLayoutPassword.setError("Password required");
             Toast.makeText(MainActivity.this, "Password field required", Toast.LENGTH_SHORT).show();
-            valid = false;
+            return false;
+        }else if(!isPasswordValid(password)) {
+            mTextInputLayoutPassword.setError("Password must be at least 6 characters");
+            return false;
         }else{
-
+            mTextInputLayoutPassword.setError(null);
         }
 
-        return valid;
+        return true;
+    }
+
+    private boolean isEmailValid(String email) {
+
+        boolean isValid = false;
+
+        CharSequence emailString = email;
+
+        Pattern pattern = Patterns.EMAIL_ADDRESS;
+        Matcher matcher = pattern.matcher(emailString);
+        if (matcher.matches()) {
+            isValid = true;
+        }
+        return isValid;
+    }
+
+    private boolean isPasswordValid(String password) {
+        return password.length() >= 6;
     }
 
     @Override
