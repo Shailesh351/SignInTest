@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SignInTest</string>
+    <string name="login_failed">Login Failed</string>
+</resources>
